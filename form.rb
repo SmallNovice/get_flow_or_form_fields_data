@@ -24,7 +24,7 @@ class MappingCsv
   end
 
   def self.is_required?(presence)
-    if presence = 'presence'
+    if presence == 'presence'
       '是'
     else
       '否'
