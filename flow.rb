@@ -40,7 +40,7 @@ class MappingCsv
 
   def self.get_all_flow_ids
     flow_ids = []
-    for i in 1..2000
+    for i in 1..1000
       begin
         get_response = JSON.parse(skylark_service.query_flow(i))
         unless get_response['title'] == '流程' || get_response['title'] == '测试'
