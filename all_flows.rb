@@ -1,9 +1,9 @@
-class MappingCsv
-  require 'csv'
-  require 'rest-client'
-  require 'jwt'
-  require_relative 'skylark_service'
+require 'csv'
+require 'rest-client'
+require 'jwt'
+require_relative 'skylark_service'
 
+class MappingCsv
   def self.csv
     CSV.open('./ceshi/all_flows.csv', 'w') do |writer|
       writer << ['流程名称', '类型', '流程id', '字段名称', '字段映射名', '是否必填', '字段位置']
