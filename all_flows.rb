@@ -5,19 +5,25 @@ require_relative 'skylark_service'
 
 class MappingCsv
   def self.csv
+    all_flows_fields =
+      self.get_all_flow_ids.each_with_object([]) do |flow_id, all_flows|
+        get_response = JSON.parse(skylark_service.query_flow(flow_id.to_i))
+        get_response['vertices'].each do |vertice_fields|
+          all_flows << { :title => get_response['title'], :id => get_response['id'],
+                         :vertice_name => vertice_fields['name'], :vertice_fields => vertice_fields['fields'] }
+        end
+      end
+    
     CSV.open('./ceshi/all_flows.csv', 'w') do |writer|
       writer << ['流程名称', '类型', '流程id', '字段名称', '字段映射名', '是否必填', '字段位置']
-      get_all_flow_ids.each do |flow_id|
-        response_fields = JSON.parse(skylark_service.query_flow(flow_id.to_i))
-        response_fields['vertices'].each_with_object([]) do |response_field, vertices_fields|
-          response_field['fields'].each do |need_field|
-            if (vertices_fields & [need_field['id']]).empty? && need_field['title'] != '-'
-              vertices_fields << need_field['id']
-              if response_field['name'] == '开始节点'
-                writer << [response_fields['title'], '流程', response_fields['id'], need_field['title'], need_field['identity_key'], is_required?(need_field['validations'][0]), '发起表单']
-              else
-                writer << [response_fields['title'], '流程', response_fields['id'], need_field['title'], need_field['identity_key'], is_required?(need_field['validations'][0]), '回传字段']
-              end
+      all_flows_fields.each_with_object([]) do |vertices_fields, vertices_fields_ids|
+        vertices_fields[:vertice_fields].each do |need_field|
+          if (vertices_fields_ids & [need_field['id']]).empty? && need_field['title'] != '-'
+            vertices_fields_ids << need_field['id']
+            if vertices_fields[:vertice_name] == '开始节点'
+              writer << [vertices_fields[:title], '流程', vertices_fields[:id], need_field['title'], need_field['identity_key'], is_required?(need_field['validations'][0]), '发起表单']
+            else
+              writer << [vertices_fields[:title], '流程', vertices_fields[:id], need_field['title'], need_field['identity_key'], is_required?(need_field['validations'][0]), '回传字段']
             end
           end
         end
@@ -52,6 +58,5 @@ class MappingCsv
     flow_ids
   end
 end
-
 
 MappingCsv.csv
