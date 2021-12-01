@@ -28,9 +28,9 @@ module Tools
     form_response
   end
 
-  def get_flows_fields
+  def get_flows_fields(first)
     all_flows = []
-    for i in 1..1000
+    for i in (first - 50)..first
       retryable do
         get_response = JSON.parse(skylark_service.query_flow(i))
         next if get_response['title'] == '流程' || get_response['title'] == '测试'
