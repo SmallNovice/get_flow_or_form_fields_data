@@ -12,7 +12,7 @@ class MappingCsv
     CSV.open('./ceshi/all_flows.csv', 'w') do |writer|
       first = 1
       writer << table_header
-      3.times do
+      20.times do
         write_csv(get_flows_fields(first += 50, logger), writer)
       end
     end

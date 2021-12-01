@@ -12,7 +12,7 @@ class MappingCsv
     CSV.open('./ceshi/all_forms.csv', 'w') do |writer|
       first = 1
       writer << table_header
-      20.times do
+      10.times do
         write_csv(get_forms_responses(first += 50, logger), writer)
       end
     end
