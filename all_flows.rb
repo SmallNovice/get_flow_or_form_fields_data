@@ -1,17 +1,19 @@
 require 'csv'
 require 'rest-client'
 require 'jwt'
+require 'logger'
 require_relative 'skylark_service'
 require_relative 'tools'
 include Tools
 
 class MappingCsv
   def csv
+    logger = Logger.new(STDOUT)
     CSV.open('./ceshi/all_flows.csv', 'w') do |writer|
       first = 1
       writer << table_header
       3.times do
-        write_csv(get_flows_fields(first += 50), writer)
+        write_csv(get_flows_fields(first += 50, logger), writer)
       end
     end
   end

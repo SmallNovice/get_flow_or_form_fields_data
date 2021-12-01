@@ -28,10 +28,11 @@ module Tools
     form_response
   end
 
-  def get_flows_fields(first)
+  def get_flows_fields(first, logger)
     all_flows = []
     for i in (first - 50)..first
-      retryable do
+      retryable(logger) do
+        logger.info "The current flow location is #{i} "
         get_response = JSON.parse(skylark_service.query_flow(i))
         next if get_response['title'] == '流程' || get_response['title'] == '测试'
         get_response['vertices'].each do |vertice_fields|
@@ -47,13 +48,14 @@ module Tools
     %w(名称 类型 id 字段名称 字段映射名 是否必填 字段位置)
   end
 
-  def retryable(options = {})
+  def retryable(logger, options = {})
     opts = { tries: 3, on: Exception }.merge(options)
     retry_exception, retries = opts[:on], opts[:tries]
     begin
       yield
     rescue retry_exception => e
       if (retries -= 1) >= 0
+        logger.info "not find flow/form,#{e.inspect}. number of retries remaining: #{retries}"
         retry
       end
     end
