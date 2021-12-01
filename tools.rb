@@ -1,9 +1,11 @@
-class Tools
-  def self.skylark_service
+module Tools
+  module_function
+
+  def skylark_service
     @skylark_service ||= SkylarkService.new
   end
 
-  def self.is_required?(presence)
+  def is_required?(presence)
     if presence == 'presence'
       '是'
     else
@@ -11,7 +13,7 @@ class Tools
     end
   end
 
-  def self.all_forms_responses
+  def all_forms_responses
     form_response = []
     for i in 1..1000
       begin
@@ -26,25 +28,34 @@ class Tools
     form_response
   end
 
-  def self.all_flows_fields
+  def get_flows_fields
     all_flows = []
     for i in 1..1000
-      begin
+      retryable do
         get_response = JSON.parse(skylark_service.query_flow(i))
-        unless get_response['title'] == '流程' || get_response['title'] == '测试'
-          get_response['vertices'].each do |vertice_fields|
-            all_flows << { :title => get_response['title'], :id => get_response['id'],
-                           :vertice_name => vertice_fields['name'], :vertice_fields => vertice_fields['fields'] }
-          end
+        next if get_response['title'] == '流程' || get_response['title'] == '测试'
+        get_response['vertices'].each do |vertice_fields|
+          all_flows << { :title => get_response['title'], :id => get_response['id'],
+                         :vertice_name => vertice_fields['name'], :vertice_fields => vertice_fields['fields'] }
         end
-      rescue
-        next
       end
     end
     all_flows
   end
 
-  def self.table_header
-    ['名称', '类型', 'id', '字段名称', '字段映射名', '是否必填', '字段位置']
+  def table_header
+    %w(名称 类型 id 字段名称 字段映射名 是否必填 字段位置)
+  end
+
+  def retryable(options = {})
+    opts = { tries: 3, on: Exception }.merge(options)
+    retry_exception, retries = opts[:on], opts[:tries]
+    begin
+      yield
+    rescue retry_exception => e
+      if (retries -= 1) >= 0
+        retry
+      end
+    end
   end
 end
