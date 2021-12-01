@@ -13,10 +13,11 @@ module Tools
     end
   end
 
-  def get_forms_responses(first)
+  def get_forms_responses(first, logger)
     form_response = []
     for i in (first - 50)..first
-      retryable do
+      retryable(logger) do
+        logger.info "The current flow location is #{i}"
         get_response = JSON.parse(skylark_service.query_form(i))
         next if get_response['title'] == '表单' || get_response['title'] == '测试'
         form_response << get_response
@@ -29,7 +30,7 @@ module Tools
     all_flows = []
     for i in (first - 50)..first
       retryable(logger) do
-        logger.info "The current flow location is #{i} "
+        logger.info "The current flow location is #{i}"
         get_response = JSON.parse(skylark_service.query_flow(i))
         next if get_response['title'] == '流程' || get_response['title'] == '测试'
         get_response['vertices'].each do |vertice_fields|
