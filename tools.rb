@@ -13,9 +13,9 @@ module Tools
     end
   end
 
-  def all_forms_responses
+  def get_forms_responses(first)
     form_response = []
-    for i in 1..1000
+    for i in (first - 50)..first
       begin
         get_response = JSON.parse(skylark_service.query_form(i))
         unless get_response['title'] == '表单' || get_response['title'] == '测试'
